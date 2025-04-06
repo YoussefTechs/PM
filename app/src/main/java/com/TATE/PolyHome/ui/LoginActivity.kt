@@ -13,19 +13,24 @@ import com.TATE.PolyHome.models.UserLoginRequest
 import com.TATE.PolyHome.models.UserLoginResponse
 import com.TATE.PolyHome.network.Api
 
+/**
+ * Activité de connexion utilisateur.
+ * Permet à l'utilisateur de se connecter avec ses identifiants.
+ * En cas de succès, le token est stocké et redirection vers HousesActivity.
+ */
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Références aux éléments de l'interface utilisateur
+        // Références aux vues de l'interface
         val emailInput = findViewById<EditText>(R.id.txtMail)
         val passwordInput = findViewById<EditText>(R.id.txtPassword)
         val loginButton = findViewById<Button>(R.id.btnConect)
         val registerButton = findViewById<Button>(R.id.btnGoToRegister)
 
-        // Gestion du bouton de connexion
+        // Bouton "Connexion"
         loginButton.setOnClickListener {
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString().trim()
@@ -37,41 +42,44 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // Gestion du bouton d'inscription
+        // Redirection vers l'inscription
         registerButton.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
+    /**
+     * Tente de connecter l'utilisateur via l'API.
+     * Stocke le token en cas de succès et redirige vers l'écran principal.
+     */
     private fun loginUser(email: String, password: String) {
-        Log.d("LoginActivity", "Tentative de connexion avec $email")
-
         val api = Api()
         val loginRequest = UserLoginRequest(login = email, password = password)
 
-        val jsonEnvoye = api.toJSON(loginRequest)
-        Log.d("LoginActivity", "Données envoyées: $jsonEnvoye")
+        Log.d("LoginActivity", "Tentative de connexion avec $email")
+        Log.d("LoginActivity", "Payload JSON: ${api.toJSON(loginRequest)}")
+
         api.post<UserLoginRequest, UserLoginResponse>(
             "https://polyhome.lesmoulinsdudev.com/api/users/auth",
             loginRequest,
             onSuccess = { code, response ->
-                Log.d("LoginActivity", "Réponse reçue: $code")
+                Log.d("LoginActivity", "Code de réponse: $code")
 
                 if (code == 200 && response != null) {
-                    Log.d("LoginActivity", "Token: ${response.token}")
+                    val token = response.token
+                    Log.d("LoginActivity", "Token reçu: ${token.take(10)}...")
 
+                    // Sauvegarde du token et login utilisateur
                     val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
                     with(sharedPref.edit()) {
-                        putString("token", response.token)
+                        putString("token", token)
                         putString("userLogin", email)
                         apply()
                     }
 
                     runOnUiThread {
                         Toast.makeText(this, "Connexion réussie", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this, HousesActivity::class.java)
-                        startActivity(intent)
+                        startActivity(Intent(this, HousesActivity::class.java))
                         finish()
                     }
                 } else {
@@ -80,7 +88,7 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             },
-            securityToken = null
+            securityToken = null // Pas besoin de token ici, c'est la connexion
         )
     }
 }

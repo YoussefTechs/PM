@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <!-- ✅ Image de fond -->
+    <!-- Fullscreen background image -->
     <ImageView
         android:id="@+id/backgroundImage"
         android:layout_width="0dp"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ Titre -->
+    <!-- Title -->
     <TextView
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ RecyclerView -->
+    <!-- RecyclerView to display list of houses -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewHouses"
         android:layout_width="0dp"
@@ -45,7 +45,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ Bouton À propos -->
+    <!-- "À propos" button -->
     <Button
         android:id="@+id/btnAbout"
         android:layout_width="wrap_content"

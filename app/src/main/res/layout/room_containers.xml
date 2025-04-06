@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            <!-- Les périphériques seront ajoutés ici dynamiquement -->
+            <!-- Ajout dynamique des peripheriques  -->
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

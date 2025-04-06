@@ -1,36 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.RegisterActivity">
 
+    <!-- Fullscreen background image with consistent scaling -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:adjustViewBounds="false"
         android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ecran" />
 
+    <!-- Semi-transparent vertical form container centered on the screen -->
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#88000000"
         android:orientation="vertical"
         android:padding="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        android:background="#88000000"
+        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView">
+        app:layout_constraintEnd_toEndOf="@+id/imageView">
 
+        <!-- Form title -->
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
@@ -41,6 +43,7 @@
             android:textSize="34sp"
             android:textStyle="bold" />
 
+        <!-- Username input field -->
         <EditText
             android:id="@+id/txtRegisterName"
             android:layout_width="300dp"
@@ -48,7 +51,6 @@
             android:layout_marginTop="50dp"
             android:layout_marginBottom="10dp"
             android:background="@color/white"
-            android:ems="10"
             android:hint="Nom"
             android:inputType="text"
             android:paddingLeft="5dp"
@@ -56,20 +58,7 @@
             android:paddingRight="5dp"
             android:paddingBottom="10dp" />
 
-        <!-- <EditText
-            android:id="@+id/txtRegisterMail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:ems="10"
-            android:hint="Adresse mail"
-            android:inputType="textEmailAddress"
-            android:paddingLeft="5dp"
-            android:paddingTop="10dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="10dp" />
-        -->
-
+        <!-- Password input field -->
         <EditText
             android:id="@+id/txtRegisterPassword"
             android:layout_width="match_parent"
@@ -77,7 +66,6 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:background="@color/white"
-            android:ems="10"
             android:hint="Mot de passe"
             android:inputType="textPassword"
             android:paddingLeft="5dp"
@@ -85,12 +73,14 @@
             android:paddingRight="5dp"
             android:paddingBottom="10dp" />
 
+        <!-- Submit button -->
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Enregistrer" />
 
+        <!-- Redirect text to login page -->
         <TextView
             android:id="@+id/textView4"
             android:layout_width="match_parent"
@@ -101,6 +91,7 @@
             android:textAlignment="center"
             android:textColor="@color/white" />
 
+        <!-- Navigation to login screen -->
         <Button
             android:id="@+id/btnGoToLogin"
             android:layout_width="match_parent"

@@ -12,6 +12,9 @@ import com.TATE.PolyHome.adapters.UserAdapter
 import com.TATE.PolyHome.network.Api
 import com.TATE.PolyHome.ui.dialogs.AddUserDialogFragment
 
+/**
+ * Activité permettant de visualiser et gérer les utilisateurs d'une maison.
+ */
 class UsersActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -25,12 +28,8 @@ class UsersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_users)
 
-        // Récupérer l'ID de la maison
         houseId = intent.getStringExtra("houseId")
-
-        // Récupérer le token d'auth depuis SharedPreferences
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        token = sharedPref.getString("token", null)
+        token = getSharedPreferences("PolyHome", Context.MODE_PRIVATE).getString("token", null)
 
         if (houseId == null || token == null) {
             Toast.makeText(this, "Erreur de chargement", Toast.LENGTH_SHORT).show()
@@ -40,9 +39,7 @@ class UsersActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerViewUsers)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = UserAdapter(users) { userLogin ->
-            removeUser(userLogin)
-        }
+        adapter = UserAdapter(users) { userLogin -> removeUser(userLogin) }
         recyclerView.adapter = adapter
 
         findViewById<Button>(R.id.btnAddUser).setOnClickListener {
@@ -52,6 +49,9 @@ class UsersActivity : AppCompatActivity() {
         loadUsers()
     }
 
+    /**
+     * Récupère la liste des utilisateurs d'une maison.
+     */
     private fun loadUsers() {
         Api().get<List<Map<String, Any>>>(
             path = "https://polyhome.lesmoulinsdudev.com/api/houses/$houseId/users",
@@ -70,21 +70,24 @@ class UsersActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Supprime un utilisateur (sauf soi-même ou le propriétaire).
+     */
     private fun removeUser(userLogin: String) {
         val currentUser = users.find { it["userLogin"] == userLogin }
         val isOwner = currentUser?.get("owner") as? Boolean ?: false
+        val currentLogin = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
+            .getString("userLogin", null)
 
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        val currentLogin = sharedPref.getString("userLogin", null)
-
-        if (userLogin == currentLogin) {
-            Toast.makeText(this, "Vous ne pouvez pas vous retirer vous-même.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (isOwner) {
-            Toast.makeText(this, "Impossible de supprimer le propriétaire", Toast.LENGTH_SHORT).show()
-            return
+        when {
+            userLogin == currentLogin -> {
+                Toast.makeText(this, "Vous ne pouvez pas vous retirer vous-même.", Toast.LENGTH_SHORT).show()
+                return
+            }
+            isOwner -> {
+                Toast.makeText(this, "Impossible de supprimer le propriétaire", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         val data = mapOf("userLogin" to userLogin)
@@ -105,14 +108,18 @@ class UsersActivity : AppCompatActivity() {
         )
     }
 
-
+    /**
+     * Ouvre une boîte de dialogue pour ajouter un utilisateur.
+     */
     private fun showAddUserDialog() {
-        val dialog = AddUserDialogFragment { userLogin ->
+        AddUserDialogFragment { userLogin ->
             addUser(userLogin)
-        }
-        dialog.show(supportFragmentManager, "AddUserDialog")
+        }.show(supportFragmentManager, "AddUserDialog")
     }
 
+    /**
+     * Ajoute un utilisateur à la maison.
+     */
     private fun addUser(userLogin: String) {
         val data = mapOf("userLogin" to userLogin)
         Api().post(

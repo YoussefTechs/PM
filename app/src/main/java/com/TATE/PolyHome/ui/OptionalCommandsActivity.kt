@@ -11,12 +11,12 @@ import com.TATE.PolyHome.models.Device
 import com.TATE.PolyHome.models.DeviceCommand
 import com.TATE.PolyHome.models.DevicesResponse
 import com.TATE.PolyHome.network.Api
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
+/**
+ * Activité pour envoyer des commandes groupées aux périphériques.
+ * Permet d’allumer/éteindre toutes les lumières ou ouvrir/fermer tous les volets/portes.
+ */
 class OptionalCommandsActivity : AppCompatActivity() {
 
     private val api = Api()
@@ -34,8 +34,8 @@ class OptionalCommandsActivity : AppCompatActivity() {
             return
         }
 
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        token = sharedPref.getString("token", null)
+        token = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
+            .getString("token", null)
 
         if (token == null) {
             Toast.makeText(this, "Vous devez vous connecter", Toast.LENGTH_SHORT).show()
@@ -43,53 +43,71 @@ class OptionalCommandsActivity : AppCompatActivity() {
             return
         }
 
-        // Boutons pour les lumières
+        // Actions lumières
         findViewById<Button>(R.id.buttonTurnOffAllLights).setOnClickListener {
-            lifecycleScope.launch { performDeviceAction("light", "TURN OFF", "Lumières éteintes") }
-        }
-
-        findViewById<Button>(R.id.buttonTurnOnAllLights).setOnClickListener {
-            lifecycleScope.launch { performDeviceAction("light", "TURN ON", "Lumières allumées") }
-        }
-
-        // Boutons pour les volets
-        findViewById<Button>(R.id.buttonOpenAllShutters).setOnClickListener {
-            lifecycleScope.launch { performDeviceAction("rolling shutter", "OPEN", "Volets ouverts") }
-        }
-
-        findViewById<Button>(R.id.buttonCloseAllShutters).setOnClickListener {
-            lifecycleScope.launch { performDeviceAction("rolling shutter", "CLOSE", "Volets fermés") }
-        }
-        findViewById<Button>(R.id.buttonCloseAllAndTurnOffLights).setOnClickListener {
             lifecycleScope.launch {
-                performDeviceAction("rolling shutter", "CLOSE", "Volets fermés")
-                performDeviceAction("garage door", "CLOSE", "Volets fermés")
                 performDeviceAction("light", "TURN OFF", "Lumières éteintes")
             }
         }
 
+        findViewById<Button>(R.id.buttonTurnOnAllLights).setOnClickListener {
+            lifecycleScope.launch {
+                performDeviceAction("light", "TURN ON", "Lumières allumées")
+            }
+        }
+
+        // Actions volets
+        findViewById<Button>(R.id.buttonOpenAllShutters).setOnClickListener {
+            lifecycleScope.launch {
+                performDeviceAction("rolling shutter", "OPEN", "Volets ouverts")
+            }
+        }
+
+        findViewById<Button>(R.id.buttonCloseAllShutters).setOnClickListener {
+            lifecycleScope.launch {
+                performDeviceAction("rolling shutter", "CLOSE", "Volets fermés")
+            }
+        }
+
+        // Scénario : tout fermer et éteindre
+        findViewById<Button>(R.id.buttonCloseAllAndTurnOffLights).setOnClickListener {
+            lifecycleScope.launch {
+                performDeviceAction("rolling shutter", "CLOSE", "Volets fermés")
+                performDeviceAction("garage door", "CLOSE", "Portes fermées")
+                performDeviceAction("light", "TURN OFF", "Lumières éteintes")
+            }
+        }
+
+        // Scénario : tout ouvrir et allumer
         findViewById<Button>(R.id.btnOpenAllAndTurnOnLights).setOnClickListener {
             lifecycleScope.launch {
                 performDeviceAction("rolling shutter", "OPEN", "Volets ouverts")
-                performDeviceAction("garage door", "OPEN", "Volets ouvert")
-
+                performDeviceAction("garage door", "OPEN", "Portes ouvertes")
                 performDeviceAction("light", "TURN ON", "Lumières allumées")
             }
         }
     }
 
-
+    /**
+     * Récupère les périphériques du type spécifié et leur envoie la commande.
+     */
     private suspend fun performDeviceAction(typeFilter: String, command: String, actionDescription: String) {
         val url = "https://polyhome.lesmoulinsdudev.com/api/houses/$houseId/devices"
+
         withContext(Dispatchers.IO) {
             api.get<DevicesResponse>(
                 url,
                 securityToken = token,
                 onSuccess = { code, response ->
                     if (code == 200 && response != null) {
-                        val devices = response.devices.filter { it.type.contains(typeFilter, true) }
+                        val devices = response.devices.filter {
+                            it.type.contains(typeFilter, ignoreCase = true)
+                        }
+
                         lifecycleScope.launch {
-                            executeCommands(devices, command, actionDescription, url)
+                            val successCount = executeCommands(devices, command, url)
+                            val msg = "$actionDescription : $successCount/${devices.size} succès"
+                            Toast.makeText(this@OptionalCommandsActivity, msg, Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         lifecycleScope.launch(Dispatchers.Main) {
@@ -101,13 +119,16 @@ class OptionalCommandsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Envoie la commande à chaque périphérique ciblé.
+     * @return Le nombre de succès (code 200)
+     */
     private suspend fun executeCommands(
         devices: List<Device>,
         command: String,
-        actionDescription: String,
         baseUrl: String
-    ) {
-        val results = withContext(Dispatchers.IO) {
+    ): Int {
+        return withContext(Dispatchers.IO) {
             devices.map { device ->
                 async {
                     var resultCode = -1
@@ -119,12 +140,7 @@ class OptionalCommandsActivity : AppCompatActivity() {
                     )
                     resultCode
                 }
-            }.awaitAll()
+            }.awaitAll().count { it == 200 }
         }
-
-        val success = results.count { it == 200 }
-
-
     }
-
 }

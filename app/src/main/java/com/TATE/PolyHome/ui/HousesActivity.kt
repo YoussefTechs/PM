@@ -19,6 +19,10 @@ import com.TATE.PolyHome.models.AddUserToHouseRequest
 import com.TATE.PolyHome.models.House
 import com.TATE.PolyHome.network.Api
 
+/**
+ * Activité principale après la connexion.
+ * Affiche les maisons disponibles et permet d'en ajouter une.
+ */
 class HousesActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -30,44 +34,42 @@ class HousesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ✅ Bouton "À propos"
-        val btnAbout = findViewById<Button>(R.id.btnAbout)
-        btnAbout.setOnClickListener {
-            val intent = Intent(this, AboutActivity::class.java)
-            startActivity(intent)
+        // Bouton "À propos"
+        findViewById<Button>(R.id.btnAbout).setOnClickListener {
+            startActivity(Intent(this, AboutActivity::class.java))
         }
 
-        // Récupérer le token depuis les préférences
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        token = sharedPref.getString("token", null)
+        // Récupérer le token stocké
+        token = getSharedPreferences("PolyHome", Context.MODE_PRIVATE).getString("token", null)
 
+        // Si le token est absent, on redirige vers l'écran de connexion
         if (token == null) {
-            // Rediriger vers login si pas de token
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
 
-        // Configurer le RecyclerView
+        // Configuration de la liste des maisons
         recyclerView = findViewById(R.id.recyclerViewHouses)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
         adapter = HouseAdapter(
             emptyList(),
             onHouseClick = { house ->
-                val intent = Intent(this, ChoiceActivity::class.java)
-                intent.putExtra("houseId", house.houseId)
-                startActivity(intent)
+                Intent(this, ChoiceActivity::class.java).apply {
+                    putExtra("houseId", house.houseId)
+                    startActivity(this)
+                }
             },
             onManageUsersClick = { house ->
-                val intent = Intent(this, UsersActivity::class.java)
-                intent.putExtra("houseId", house.houseId.toString())
-                startActivity(intent)
+                Intent(this, UsersActivity::class.java).apply {
+                    putExtra("houseId", house.houseId.toString())
+                    startActivity(this)
+                }
             }
         )
-
         recyclerView.adapter = adapter
 
-        // Charger les maisons
         loadHouses()
     }
 
@@ -90,25 +92,28 @@ class HousesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Charge la liste des maisons depuis l'API.
+     */
     private fun loadHouses() {
         api.get<List<House>>(
             "https://polyhome.lesmoulinsdudev.com/api/houses",
             onSuccess = { code, response ->
-                if (code == 200 && response != null) {
-                    Log.d("HousesActivity", "Maisons reçues: ${response.size}")
-                    runOnUiThread {
-                        adapter.updateHouses(response)
-                    }
-                } else if (code == 403) {
-                    runOnUiThread {
-                        Toast.makeText(this, "Session expirée, veuillez vous reconnecter", Toast.LENGTH_SHORT).show()
-                        clearToken()
-                        startActivity(Intent(this, LoginActivity::class.java))
-                        finish()
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this, "Erreur lors du chargement des maisons", Toast.LENGTH_SHORT).show()
+                runOnUiThread {
+                    when {
+                        code == 200 && response != null -> {
+                            Log.d("HousesActivity", "Maisons reçues: ${response.size}")
+                            adapter.updateHouses(response)
+                        }
+                        code == 403 -> {
+                            Toast.makeText(this, "Session expirée, veuillez vous reconnecter", Toast.LENGTH_SHORT).show()
+                            clearToken()
+                            startActivity(Intent(this, LoginActivity::class.java))
+                            finish()
+                        }
+                        else -> {
+                            Toast.makeText(this, "Erreur lors du chargement des maisons", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             },
@@ -116,32 +121,36 @@ class HousesActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Affiche une boîte de dialogue pour entrer un ID de maison à rejoindre.
+     */
     private fun showAddHouseDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Attribuer une maison")
-
-        val input = EditText(this)
-        input.hint = "Entrez l'ID de la maison"
-        builder.setView(input)
-
-        builder.setPositiveButton("Attribuer") { dialog, _ ->
-            val houseIdText = input.text.toString()
-            if (houseIdText.isNotEmpty()) {
-                try {
-                    val houseId = houseIdText.toInt()
-                    addUserToHouse(houseId)
-                } catch (e: NumberFormatException) {
-                    Toast.makeText(this, "L'ID de la maison doit être un nombre", Toast.LENGTH_SHORT).show()
-                }
-            }
-            dialog.dismiss()
+        val input = EditText(this).apply {
+            hint = "Entrez l'ID de la maison"
         }
 
-        builder.setNegativeButton("Annuler") { dialog, _ -> dialog.cancel() }
-
-        builder.show()
+        AlertDialog.Builder(this)
+            .setTitle("Attribuer une maison")
+            .setView(input)
+            .setPositiveButton("Attribuer") { dialog, _ ->
+                val houseIdText = input.text.toString()
+                if (houseIdText.isNotEmpty()) {
+                    try {
+                        val houseId = houseIdText.toInt()
+                        addUserToHouse(houseId)
+                    } catch (e: NumberFormatException) {
+                        Toast.makeText(this, "L'ID de la maison doit être un nombre", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Annuler") { dialog, _ -> dialog.cancel() }
+            .show()
     }
 
+    /**
+     * Envoie la requête pour ajouter un utilisateur à une maison.
+     */
     private fun addUserToHouse(houseId: Int) {
         val userLogin = getUserLoginFromSharedPreferences()
         if (userLogin == null) {
@@ -149,7 +158,7 @@ class HousesActivity : AppCompatActivity() {
             return
         }
 
-        val request = AddUserToHouseRequest(userLogin = userLogin)
+        val request = AddUserToHouseRequest(userLogin)
         api.post<AddUserToHouseRequest>(
             "https://polyhome.lesmoulinsdudev.com/api/houses/$houseId/users",
             request,
@@ -157,12 +166,12 @@ class HousesActivity : AppCompatActivity() {
                 runOnUiThread {
                     when (code) {
                         200 -> {
-                            Toast.makeText(this, "Accès à la maison accordé avec succès", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Accès à la maison accordé", Toast.LENGTH_SHORT).show()
                             loadHouses()
                         }
                         403 -> Toast.makeText(this, "Accès interdit. Vous n'êtes pas propriétaire.", Toast.LENGTH_SHORT).show()
                         409 -> Toast.makeText(this, "Vous avez déjà accès à cette maison", Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(this, "Erreur lors de l'attribution de la maison (code $code)", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Erreur lors de l'attribution (code $code)", Toast.LENGTH_SHORT).show()
                     }
                 }
             },
@@ -170,6 +179,9 @@ class HousesActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Déconnexion et retour à l'écran de login.
+     */
     private fun logout() {
         clearToken()
         startActivity(Intent(this, LoginActivity::class.java))
@@ -177,8 +189,7 @@ class HousesActivity : AppCompatActivity() {
     }
 
     private fun clearToken() {
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
+        getSharedPreferences("PolyHome", Context.MODE_PRIVATE).edit().apply {
             remove("token")
             remove("userLogin")
             apply()
@@ -186,7 +197,7 @@ class HousesActivity : AppCompatActivity() {
     }
 
     private fun getUserLoginFromSharedPreferences(): String? {
-        val sharedPref = getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
-        return sharedPref.getString("userLogin", null)
+        return getSharedPreferences("PolyHome", Context.MODE_PRIVATE)
+            .getString("userLogin", null)
     }
 }

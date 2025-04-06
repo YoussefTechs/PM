@@ -5,10 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.DeviceListActivity"
-    >
+    tools:context=".ui.DeviceListActivity">
 
-    <!-- Image de fond -->
+    <!-- Background image stretched to fill the entire screen -->
     <ImageView
         android:id="@+id/backgroundImage"
         android:layout_width="match_parent"
@@ -16,7 +15,7 @@
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/ecran" />
 
-    <!-- Contenu par-dessus -->
+    <!-- Scrollable content layered over the background -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -27,7 +26,7 @@
             android:padding="16dp"
             android:orientation="vertical">
 
-            <!-- Titre et informations -->
+            <!-- Section header title -->
             <TextView
                 android:id="@+id/textViewDevicesTitle"
                 android:layout_width="wrap_content"
@@ -40,6 +39,7 @@
                 android:textColor="?attr/colorOnSurface"
                 android:fontFamily="sans-serif-medium" />
 
+            <!-- Info text providing usage guidance -->
             <TextView
                 android:id="@+id/textViewDevicesInfo"
                 android:layout_width="match_parent"
@@ -51,7 +51,7 @@
                 android:textColor="?attr/colorOnSurface"
                 android:fontFamily="sans-serif" />
 
-            <!-- Bouton de déconnexion -->
+            <!-- Logout button with Material styling -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonLogout"
                 android:layout_width="wrap_content"
@@ -67,13 +67,12 @@
                 android:backgroundTint="?attr/colorPrimary"
                 android:textColor="?attr/colorOnPrimary" />
 
-            <!-- Conteneur des salles -->
+            <!-- Dynamic container populated with rooms and devices at runtime -->
             <LinearLayout
                 android:id="@+id/roomsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-
                 android:orientation="vertical"/>
         </LinearLayout>
     </ScrollView>

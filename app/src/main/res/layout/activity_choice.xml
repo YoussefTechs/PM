@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.ChoiceActivity">
 
-    <!-- ✅ Image de fond -->
+    <!-- Fullscreen background image with centerCrop scaling -->
     <ImageView
         android:id="@+id/backgroundImage"
         android:layout_width="0dp"
@@ -19,15 +19,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ Carte de conseils -->
+    <!-- Advice card to show usage tips (dismissable by user) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/adviceCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:backgroundTint="#CCFFFFFF"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
-        android:backgroundTint="#CCFFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -38,6 +38,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Instructional text explaining command sections -->
             <TextView
                 android:id="@+id/adviceText"
                 android:layout_width="match_parent"
@@ -46,6 +47,7 @@
                 android:textColor="#000000"
                 android:textSize="14sp" />
 
+            <!-- Button to close the advice card -->
             <Button
                 android:id="@+id/btnDismissAdvice"
                 android:layout_width="wrap_content"
@@ -54,11 +56,11 @@
                 android:textAllCaps="false"
                 android:layout_gravity="end"
                 android:textColor="@color/vertbleu"
-                android:background="@android:color/transparent"/>
+                android:background="@android:color/transparent" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- ✅ Conteneur des boutons -->
+    <!-- Section containing the main action buttons -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="wrap_content"
@@ -72,6 +74,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Navigation to per-device command screen -->
         <Button
             android:id="@+id/buttonGestionPrecise"
             android:layout_width="wrap_content"
@@ -80,6 +83,7 @@
             android:textSize="16sp"
             android:layout_marginBottom="20dp" />
 
+        <!-- Navigation to global command screen -->
         <Button
             android:id="@+id/buttonGestionGenerale"
             android:layout_width="wrap_content"

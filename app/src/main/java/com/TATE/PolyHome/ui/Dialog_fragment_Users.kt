@@ -6,8 +6,12 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 
+/**
+ * Boîte de dialogue permettant d'ajouter un utilisateur à une maison.
+ * Appelle le callback [onUserAdded] avec le login saisi si le champ n'est pas vide.
+ */
 class AddUserDialogFragment(
-    private val onUserAdded: (String) -> Unit
+    private val onUserAdded: (String) -> Unit // Callback déclenché si l'utilisateur confirme
 ) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

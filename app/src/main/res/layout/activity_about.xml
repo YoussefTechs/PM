@@ -5,10 +5,33 @@
     android:background="@android:color/white"
     android:padding="24dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:text="Cette application a été développée par Youssef Fadile et Abdeladim Tate, étudiants en Master 1 Base de Données et Intelligence Artificielle à l'université de Bourgogne Europe à Dijon. Réalisée dans le cadre d’un projet universitaire, elle permet de contrôler les differents appareils d'une maison connectée avec une interface intuitive.\n\nL’objectif était de mettre en pratique le langage Kotlin et découvrir le développement mobile Android. Grâce à ce projet, nous envisageons de le porter également sur iOS avec le framework Flutter durant l’été 2025, en projet personnel.\n\nNous remercions notre professeur M. Meunier pour son accompagnement et inspiration." />
+        android:orientation="vertical">
+
+        <!-- Titre principal -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="À propos de l'application"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:paddingBottom="16dp" />
+
+        <!-- Texte principal -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:lineSpacingExtra="4dp"
+            android:text="Cette application a été développée par Youssef Fadile et Abdeladim Tate, étudiants en Master 1 Base de Données et Intelligence Artificielle à l'université de Bourgogne Europe à Dijon. Réalisée dans le cadre d’un projet universitaire, elle permet de contrôler les différents appareils d'une maison connectée avec une interface intuitive.
+
+            L’objectif était de mettre en pratique le langage Kotlin et découvrir le développement mobile Android. Grâce à ce projet, nous envisageons de le porter également sur iOS avec le framework Flutter durant l’été 2025, en projet personnel.
+
+            Nous remercions notre professeur M. Meunier pour son accompagnement et inspiration." />
+
+    </LinearLayout>
 </ScrollView>
